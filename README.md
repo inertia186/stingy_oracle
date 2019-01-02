@@ -1,0 +1,2 @@
+# stingy
+STINGY Token

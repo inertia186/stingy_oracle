@@ -1,0 +1,13 @@
+development:
+  encoding: unicode
+  adapter: postgresql
+  database: stingy_development
+  
+production:
+  adapter: postgresql
+  database: stingy_production
+  
+test: &test
+  adapter: postgresql
+  database: stingy_test
+  

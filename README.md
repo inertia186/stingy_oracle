@@ -1,10 +1,19 @@
-# STINGY Token
+# [STINGY Token Oracle](https://github.com/inertia186/stingy_oracle)
 
 Initial logic based on:
 
 https://steemit.com/steemit/@inertia/feature-request-flag-rewards
 
 In a nutshell, if you can correctly predict a particular post will be downvoted to zero payout, you get a reward.
+
+## TL;DR
+
+First, click the opt-in link:
+
+* [opt-in](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20true%7D)
+* [opt-out](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20false%7D)
+
+Go find stuff on Trending and be the first person to flag them.  If you flag something that later ends up getting flagged to zero, you get STINGY tokens.
 
 ## A Little Deeper
 
@@ -57,16 +66,9 @@ end
 * `avg_rshares = avg_rshares.sum(:rshares) / avg_rshares.count`
   * Sum of rshares divided by that third
 
-## Windowing
-
-Should we use head/irreversible blocks to determine the current window of posts?
-
-* E.g.: `head_block_num - 201600 # blocks`
-  * Latest block number minus 1 week of blocks
-
 ## Payout
 
-Each post qualifies for 1 STINGY if that post a) would have been on Trending, b) has instead been downvoted to zero, and c) has downvotes from accounts that opt-in.
+Each post qualifies for 1 STINGY if that post **a)** would have been on Trending, **b)** has instead been downvoted to zero, and **c)** has downvotes from accounts that opt-in.
 
 * If only one account downvotes, that account gets the entire STINGY payout for that post.
   * E.g., the one and only downvote came from Alice and Alice opts into STINGY
@@ -74,16 +76,23 @@ Each post qualifies for 1 STINGY if that post a) would have been on Trending, b)
   * E.g., two downvotes: one came from Alice; Alice opts into STINGY; one came from Bob; Bob does not opt into STINGY
 * If multiple opt-in accounts downvote, payout is split by absolute rshares.
   * E.g., both downvotes came from Alice and Bob; Alice and Bob both opt into STINGY
-  * The downvoted with the most absolute rshares gets most of the STINGY.
+  * The downvoter with the most absolute rshares gets most of the STINGY.
   * Ties prefer the earliest voter.
 
 ## Opt-In / Consensus
 
-As mentioned above, only posts that have downvotes from accounts that have opt-in records should be considered in the results.  It might be possible to optimize the query to only process posts that have downvotes from opt-in accounts, but this might not provide much optimization because the votes field is a string.
+As mentioned above, only posts that have downvotes from accounts that have opt-in records should be considered in the results.  It might be possible to optimize the query to only process posts that have downvotes from opt-in accounts, but this might not provide much optimization because the votes field in hivemind is a string.
 
-We’re using a non-consensus database (hivemind) to determine payout.  This is probably ok, but it’s good to keep in mind that this may create some corner cases that aren’t fully specified.
+We’re using a non-consensus hivemind database to determine payout.  This is probably ok, but it’s good to keep in mind that this may create some corner cases that aren’t fully specified.
 
 Corner cases, like, extra payouts when there shouldn’t be any or missing payouts.
+
+Since the hivemind database is non-consensus, certain elements like vote order must be queried at payout to determine the true order of votes.  This does not present much of a problem, but does require minimal API access for each payout phase.
+
+Links:
+
+* [opt-in](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20true%7D)
+* [opt-out](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20false%7D)
 
 ## Gaming The System
 
@@ -104,3 +113,9 @@ One way to mitigate some of these concerns is to only focus on posts that reach 
 Let’s say Eve posts plagiarism and buys bit-bot votes.  Alice notices it and downvotes it early, seeking a STINGY payout.  Being that Alice is a STINGY super-star, bit-bots notice Alice’s votes and revoke their votes.  Now Alice will not receive a STINGY payout.  Technically, the post briefly made it to Trending but there’s no simple way to determine this without replaying the blockchain.
 
 This is a win for the platform, but not for Alice.  In this situation, Alice might consider unvoting as well.
+
+---
+
+<center>
+<img src="https://i.imgur.com/DqnmWS9.jpg" />
+</center>

@@ -34,11 +34,18 @@ class Stingy::OperationIndexerJob
     
     puts "Resuming from latest block number: #{Stingy::State.latest_block_num} ..."
     
+    last_block_num = nil
+    
     stream.operations(options) do |op, _trx_id, block_num|
       if Stingy::State.latest_block_num < block_num
         Stingy::State.latest_block_num = block_num
       end
       
+      if last_block_num != block_num && block_num % 10000 == 0
+        puts "Current op index block_num: #{block_num}"
+      end
+      
+      last_block_num = block_num
       custom_json_operation = op.value
       id = custom_json_operation.id
       

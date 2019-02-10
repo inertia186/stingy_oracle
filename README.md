@@ -13,7 +13,7 @@ First, click the opt-in link:
 * [opt-in](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20true%7D)
 * [opt-out](https://app.steemconnect.com/sign/custom-json?id=stingy&json=%7B%22opt_in%22%3A%20false%7D)
 
-Go find stuff on Trending and be the first person to flag them.  If you flag something that later ends up getting flagged to zero, you get STINGY tokens.
+Go find stuff on Trending and be the first person to flag them.  If you flag something that later ends up getting flagged to zero, you get [STINGY tokens](https://steem-engine.com/?p=history&t=STINGY).
 
 ## A Little Deeper
 
@@ -110,7 +110,7 @@ One way to mitigate some of these concerns is to only focus on posts that reach 
 
 ## Dealing With Unvotes
 
-Let’s say Eve posts plagiarism and buys bit-bot votes.  Alice notices it and downvotes it early, seeking a STINGY payout.  Being that Alice is a STINGY super-star, bit-bots notice Alice’s votes and revoke their votes.  Now Alice will not receive a STINGY payout.  Technically, the post briefly made it to Trending but there’s no simple way to determine this without replaying the blockchain.
+Let’s say Eve posts plagiarism and buys bid-bot votes.  Alice notices it and downvotes it early, seeking a STINGY payout.  Being that Alice is a STINGY super-star, bid-bots notice Alice’s votes and revoke their votes.  Now Alice will not receive a STINGY payout.  Technically, the post briefly made it to Trending but there’s no simple way to determine this without replaying the blockchain.
 
 This is a win for the platform, but not for Alice.  In this situation, Alice might consider unvoting as well.
 

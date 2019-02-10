@@ -1,0 +1,9 @@
+STINGY contractAction: create
+
+mainchain: https://steemd.com/b/30206284#1f1cceefd231448e5c16abad0b7a2d83659c6882
+sidechain: https://bloks.xyz/b/490
+
+STINGY contractAction: updateUrl
+
+mainchain: https://steemd.com/b/30233680#34140e1c87ad65fda1a81284aab4d0ae0d3ec4d3
+sidechain: https://bloks.xyz/b/540

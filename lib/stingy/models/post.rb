@@ -50,13 +50,15 @@ class Stingy::Post < Stingy::Base
     
     transaction do
       op_values = []
+      original_payout = remaining_payout = stingy_payout_amount
       
       downvote_ratios.each do |user_name, ratio|
-        break if reload.stingy_payout_amount < 0.00000001
+        break if remaining_payout < 0.00000001
         
         if !!user = Stingy::User.opt_in.find_by_name(user_name)
-          stingy_payout_share = stingy_payout_amount * ratio
+          stingy_payout_share = original_payout * ratio
           decrement(:stingy_payout_amount, stingy_payout_share)
+          remaining_payout -= stingy_payout_share
           save
           
           if stingy_payout_share >= 0.00000001

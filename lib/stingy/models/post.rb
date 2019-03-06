@@ -51,6 +51,7 @@ class Stingy::Post < Stingy::Base
     transaction do
       op_values = []
       original_payout = remaining_payout = stingy_payout_amount
+      authors_paid = 0
       
       downvote_ratios.each do |user_name, ratio|
         break if remaining_payout < 0.00000001
@@ -62,8 +63,7 @@ class Stingy::Post < Stingy::Base
           save
           
           if stingy_payout_share >= 0.00000001
-            amount = stingy_payout_share.round(8)
-            user.increment(:stingy_payout_amount, amount) # Just for our records.
+            user.increment(:stingy_payout_amount, stingy_payout_share) # Just for our records.
             user.save
             
             json = {
@@ -72,7 +72,7 @@ class Stingy::Post < Stingy::Base
               contractPayload: {
                 symbol: Stingy::STEEM_ENGINE_TOKEN_SYMBOL,
                 to: user.name,
-                quantity: amount,
+                quantity: '%.8f' % stingy_payout_share,
                 memo: "@#{author}/#{permlink}"
               }
             }
@@ -96,12 +96,13 @@ class Stingy::Post < Stingy::Base
 
             op_values.last[:json] ||= []
             op_values.last[:json] << json
+            authors_paid += 1
           end
         end
       end
       
       if op_values.any?
-        puts "Paying #{op_values.size} author(s) ..."
+        puts "Paying #{authors_paid} author(s) ..."
         
         op_values.each_with_index do |v, i|
           op_values[i][:json] = v[:json].to_json

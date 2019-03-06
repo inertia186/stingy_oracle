@@ -1,0 +1,9 @@
+Total #{Stingy::STEEM_ENGINE_TOKEN_SYMBOL} tokens issued: **#{'%.8f' % (token["circulatingSupply"] || token["supply"])}**
+All opt-in users: **#{Stingy::User.opt_in.count}** #{"\r\n"}
+
+\#### Rewards since #{posts.minimum(:updated_at).utc}: #{"\r\n"}
+
+| Account | Qualified Flags | #{Stingy::STEEM_ENGINE_TOKEN_SYMBOL} Rewards&#x20;|
+|-|-|-:|
+- users.each do |user|
+  | #{user.name} | #{flags[user.name]} | #{'%.8f' % user.stingy_payout_amount}&#x20;|

@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'hivemind-ruby', require: 'hive'
+gem 'irb'
 gem 'pry'
 
-# Specify your gem's dependencies in stingy.gemspec
 gemspec

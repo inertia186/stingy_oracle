@@ -1,8 +1,19 @@
 class Stingy::PostIndexerJob
   TRENDING_SEGMENT = 3
   
-  def perform
-    puts "Performing post index ..."
+  def perform(options = {pretend: false, relative_days: 0, payout: 0.0})
+    pretend = !!options[:pretend]
+    relative_days = options[:relative_days] || 0
+    payout = options[:payout] || 0.0
+    
+    pretend = true if relative_days != 0
+    pretend = true if payout != 0.0
+    
+    if !!pretend
+      puts 'Not performing post index (pretend mode) ...'
+    else
+      puts 'Performing post index ...'
+    end
     
     # To find current trending rshares average ...
     avg_rshares = if Stingy::State.refresh_latest_avg_rshares?
@@ -23,22 +34,39 @@ class Stingy::PostIndexerJob
       Stingy::State.latest_avg_rshares
     end
     
-    payout_at = Stingy::State.latest_payout_at || 1.day.ago
-    now = Time.now
+    payout_start_at = Stingy::State.latest_payout_at || 1.day.ago
+    payout_start_at += relative_days.days if relative_days < 0
+    payout_end_at = Time.now
+    payout_end_at += relative_days.days if relative_days > 0
     
-    puts "Looking for new posts since: #{payout_at}"
+    if relative_days == 0
+      puts "Looking for new posts since: #{payout_start_at}"
+    else
+      puts "Looking for new posts between #{payout_start_at} and #{payout_end_at}"
+    end
     
-    Hive::PostsCache.
-      # We want the payout zero and paid in the past.
-      where("is_paidout = 't' AND payout = 0").
-      # We want some downvotes.
-      where("total_votes > up_votes").
-      # But more downvotes than upvotes in rshares.
-      where("rshares < 0").
+    posts = if payout < 0.001
+      # We want the payout zero.
+      Hive::PostsCache.where('payout = 0').where("rshares < 0")
+    else
+      # We want the payout in the range of zero and n.
+      Hive::PostsCache.where('payout BETWEEN 0 AND ?', payout)
+    end
+    
+    posts = if relative_days > 0
+      # Not paid yet (peeking into the future).
+      posts.where("is_paidout = 'f'")
+    else
+      # Paid in the past.
+      posts.where("is_paidout = 't'")
+    end
+    
+    # We want some downvotes.
+    posts = posts.where("total_votes > up_votes").
       # We only need these fields in the result.
       select(:post_id, :votes, :payout_at).
       # Set a window in the past to work from.
-      where("payout_at BETWEEN ? AND ?", payout_at, now).
+      where("payout_at BETWEEN ? AND ?", payout_start_at, payout_end_at).
       # We can use find_each as long as we don't use limit or order.
       find_each do |p|
       
@@ -80,15 +108,19 @@ class Stingy::PostIndexerJob
           payout_at: p.payout_at
         }
         
-        Stingy::Post.create(params)
-        
-        if Stingy::State.latest_payout_at < p.payout_at
-          Stingy::State.latest_payout_at = p.payout_at
+        unless !!pretend
+          Stingy::Post.create(params)
+          
+          if Stingy::State.latest_payout_at < p.payout_at
+            Stingy::State.latest_payout_at = p.payout_at
+          end
         end
       end
       
-      if Stingy::State.latest_payout_at.nil? || Stingy::State.latest_payout_at < now
-        Stingy::State.latest_payout_at = now
+      unless !!pretend
+        if Stingy::State.latest_payout_at.nil? || Stingy::State.latest_payout_at < payout_end_at
+          Stingy::State.latest_payout_at = payout_end_at
+        end
       end
     end
   end

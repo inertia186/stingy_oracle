@@ -5,7 +5,7 @@ class Stingy::Post < Stingy::Base
   
   DEFAULT_STINGY_PAYOUT_AMOUNT = 1.0
   
-  scope :stingy_payout_applied, lambda { |stingy_payout_applied|
+  scope :stingy_payout_applied, lambda { |stingy_payout_applied = true|
     where(stingy_payout_applied: stingy_payout_applied)
   }
   

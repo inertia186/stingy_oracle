@@ -14,14 +14,21 @@ Bundler.require
 module Stingy
   STINGY_ENV = ENV.fetch('STINGY_ENV', 'development')
   
-  if STINGY_ENV == 'production'
+  case STINGY_ENV
+  when'production'
     STEEM_ENGINE_OP_ID = 'ssc-mainnet1'
+    STEEM_ENGINE_TOKEN_SYMBOL = 'STINGY'
+  when 'staging'
+    # qa (testnet)
+    STEEM_ENGINE_OP_ID = 'ssc-00000000000000000002'
     STEEM_ENGINE_TOKEN_SYMBOL = 'STINGY'
   else
     # qa (testnet)
     STEEM_ENGINE_OP_ID = 'ssc-00000000000000000002'
     STEEM_ENGINE_TOKEN_SYMBOL = 'SPAMMY'
   end
+  
+  require 'stingy/agent'
 end
 
 hive_database_url = ENV['DATABASE_URL']
@@ -45,7 +52,7 @@ end
 
 Stingy::Base.establish_connection({
   adapter: 'postgresql',
-  database: "stingy_#{Stingy::STINGY_ENV}",
+  database: "stingy_#{Stingy::STINGY_ENV == 'staging' ? 'development' : Stingy::STINGY_ENV}",
   host: 'localhost',
   port: 5432,
   timeout: 60

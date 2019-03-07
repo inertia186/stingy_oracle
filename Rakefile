@@ -25,6 +25,23 @@ task :op_indexer do
   job.perform
 end
 
+task :health_check do
+  latest_block_num = Stingy::State.latest_block_num
+  api = Steem::DatabaseApi.new
+  
+  api.get_dynamic_global_properties do |dgpo|
+    time = Time.parse(dgpo.time + 'Z')
+    time_diff = Time.now - time
+    block_diff = dgpo.head_block_number - latest_block_num
+    
+    puts "Current blockchain time: #{time} (#{time_diff} seconds from now)"
+    puts "Distance from head block_num: #{block_diff} (#{block_diff * 3} seconds behind)"
+    
+    exit(-1) if block_diff > 42 # twice irreversible
+    exit(0)
+  end
+end
+
 task :post_indexer, [:pretend, :relative_days, :payout] do |t, args|
   pretend = (args[:pretend] || 'false') == 'true'
   relative_days = (args[:relative_days] || '0').to_i
